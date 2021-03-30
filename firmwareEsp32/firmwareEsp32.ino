@@ -29,15 +29,6 @@ Servo servo1;
 Servo servo2;
 Servo servo3;
 
-/*************************************************************************
-   FUNCTIONS PROTOTIPES
-  /************************************************************************/
-
-void on_movment();
-String SendHTML(uint8_t gusano_state, int movment, int Tdelay);
-void LateralRight();
-void LinearBack();
-void LateralLeft();
 
 /*************************************************************************
    ARRAY DEFINITION FOR SERVOS
