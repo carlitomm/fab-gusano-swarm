@@ -1,6 +1,31 @@
 #ifndef _HTML_H_
 #define _HTML_H_
 
+String HTMLheader(){
+  String ptr = "<!DOCTYPE html> <html>\n";
+  ptr += "<head><meta name =\"veiwport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
+  ptr += "<title>MEAT Control</title>\n";
+
+  ptr += "<style>html { font-family: Helvetica; display:inline-block; margin: 0px auto; text-align: center;}\n";
+  ptr += "body{margin-top: 50px;} h1 {color: #9c4444; margin: 50px auto 30px; } h3 {color: #444444;margin-bottom: 50px;}\n";
+  ptr += "body{margin-top: 50px;} h1 {color: #b43333;margin: 50px;} h2 {color: #444444; padding: 30px 0px; margin: 50px; background-color: #5c8297c0;}\n";
+  ptr += ".button {display: block; width: 80px; background-color: #3498db; border: none; color: white; padding: 13px 30px; text-decoration: none; font-size: 35px; margin: 0px auto 30px; cursor: pointer; border-radius: 4px}\n";
+
+  ptr += ".button-on {background-color: #65e70f; width: 100px; height: 45px; font-size: 45px;}\n";
+  ptr += ".button-on:active {background-color: #65e70f; width: 100px;}\n";
+  ptr += ".button-off {background-color: #ee0808; width: 120px; height: 60px; font-size: 45px;}\n";
+  ptr += ".button-off:active {background-color: #ee0808; width: 100px;}\n";
+
+  ptr += ".button-spd {background-color: #3498db; margin: auto}\n";
+  ptr += ".button-mov {background-color: #3498db; width: 170px; text-align: center;}\n";
+
+  ptr += "p {font-size: 35px;}";
+  ptr += "</style>\n";
+
+  ptr += "</head>\n";
+  return ptr;
+}
+
 String SendHTML(uint8_t gusano_state, int movment, int Tdelay) {
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr += "<head><meta name =\"veiwport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
@@ -153,8 +178,26 @@ String SendHTML(uint8_t gusano_state, int movment, int Tdelay) {
     }
   }
 
+  ptr += "<a class=\"button button-mov\" href = \"/swarm_behavior\" >swarm_behavior</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/swarm_role\" >swarm_role</a> \n";
   ptr += " </body>\n";
   ptr += " </html>\n";
   return ptr;
 }
+
+String SendSwarmBehavior(){
+  String ptr = HTMLheader();
+  ptr += "<a class=\"button button-mov\" href = \"/\" >Coleography</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/\" >Following</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/\" >Mixed</a> \n";
+  return ptr;
+}
+
+String SendSwarmRole(){
+  String ptr = HTMLheader();
+  ptr += "<a class=\"button button-mov\" href = \"/\" >Leader</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/\" >Follower</a> \n";
+  return ptr;
+}
+
 #endif
