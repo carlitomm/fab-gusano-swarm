@@ -16,14 +16,16 @@ static uint8_t PEER[]{0xDA, 0xBF, 0xC0, 0xF9, 0xEA, 0x25};
 char datoRX[6];
 Mod_String Orientaciones;
 
-int inicio;
-int modo =1; //Modo de trabajo del robot: 1 Coreografia, 2 Seguimiento, 3 Mezcla
+WifiEspNowSendStatus status_A; 
+
+int inicio, cont;
+int modo =2; //Modo de trabajo del robot: 1 Coreografia, 2 Seguimiento, 3 Mezcla
 int opcion =1; //Opcion de seguimiento : 1 Lider, 2 Seguidor
 int valx = 3000;
 int valy = 4000;
 int valz = 5000;
-int RSSI_;
-int d_RSSI, dist_RSSI;
+float RSSI_;
+float d_RSSI, dist_RSSI;
 
 //Variables para la obtencion de las orientaciones
 const int mpuAddress = 0x68;
@@ -43,13 +45,6 @@ void updateGiro(){
 
 accel_ang_x = atan(ay / sqrt(pow(ax, 2) + pow(az, 2)))*(180.0/ 3.14);
 accel_ang_y = atan(-ax / sqrt(pow(ay, 2) + pow(az, 2)))*(180.0/ 3.14);
-
- // girosc_ang_x = 0.98*(girosc_ang_x_prev + (gx / 131)*dt) + 0.02*accel_ang_x;
- // girosc_ang_y = 0.98*(girosc_ang_y_prev + (gy / 131)*dt) + 0.02*accel_ang_y;
-   
-//girosc_ang_x = (gx / 131)*dt / 1000.0 + girosc_ang_x_prev;
-//girosc_ang_y = (gy / 131)*dt / 1000.0 + girosc_ang_y_prev;
- //girosc_ang_z = (gz / 131)*dt/ 1000.0 + girosc_ang_z_prev;
 
   girosc_ang_x_prev = girosc_ang_x;
     girosc_ang_y_prev = girosc_ang_y;
@@ -82,7 +77,7 @@ printReceivedMessage(const uint8_t mac[6], const uint8_t* buf, size_t count, voi
     S_valorZ= cadena;
     break;
     case 'I':
-    inicio = 1;
+    //inicio = 1;
     break;
 
   }
@@ -131,34 +126,37 @@ setup()
   S_valorY="";
   S_valorZ="";
 
+   cont =0;
   inicio = 0;
-
-  /*while(inicio == 0){ //Sincronizacion cambiarla y pasarla al setup
-    char msg[60];
-  int ini = snprintf(msg, sizeof(msg), "I %d",1);
-  WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), ini);
-  Serial.println("Pareja desconectada");
-  delay(50);
-    //*****Fin Sincronizacion Falla por ahora
-  }*/
-  
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+  while(inicio != 1){
+      char msg[60];
+  int lenm = snprintf(msg, sizeof(msg), "Inicio");
+  WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), lenm);
+  delay(20);
+      status_A = WifiEspNow.getSendStatus();
+      if(status_A == WifiEspNowSendStatus::OK)
+    { inicio = 1;}
     Serial.print(".");
-  }
-    Serial.println("");
-  Serial.println("WiFi connected");
+    }
+    Serial.println();
 }
 
 void
 loop()
 {
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  //#####Desconexion
+  while(cont>10)
+  {
+      char msg[60];
+  int lenm = snprintf(msg, sizeof(msg), "Inicio");
+  WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), lenm);
+  delay(20);
+      status_A = WifiEspNow.getSendStatus();
+    if(status_A == WifiEspNowSendStatus::OK)
+    { cont=0;}
+    Serial.println("Desconectado");
   }
-    Serial.println("");
-  Serial.println("WiFi connected");
+  //#####Desconexion
  
 //Leer los datos modo y opcion de la web
 
@@ -168,6 +166,18 @@ loop()
   updateGiro();
 // Detalle: hasta ahora los valores validos son girosc_ang_x y girosc_ang_y
 
+    int n=WiFi.scanNetworks();
+    if(n==0)
+    Serial.println("No networks found");
+    else{
+      for(int i=0;i<n;++i){
+       if(WiFi.SSID(i)!="ESPNOW")
+        continue;
+     RSSI_=WiFi.RSSI(i);
+      
+        }}
+
+
 //Procedimiento para TX las Orientaciones y RSSI
   char msg[60];
   int lenx = snprintf(msg, sizeof(msg), "X %d",valx);
@@ -176,43 +186,65 @@ loop()
   WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), leny);
   int lenz = snprintf(msg, sizeof(msg), "Z %d",valz);
   WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), lenz);
-    int lenrssi = snprintf(msg, sizeof(msg), "R %d",RSSI_);
+    int lenrssi = snprintf(msg, sizeof(msg), "R %f",RSSI_);
   WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), lenrssi);
+ delay(50);
   //Fin TX
-  
+
+ 
+  //!!!!!!!!!!!!!!!!!!!!!
+    status_A = WifiEspNow.getSendStatus();
+    if(status_A == WifiEspNowSendStatus::OK)
+   { cont=0;
+    Serial.println("Estoy OK");}
+   else if(status_A == WifiEspNowSendStatus::NONE)
+     { 
+     Serial.println("Estoy NONE");}
+     else if(status_A == WifiEspNowSendStatus::FAIL)
+     { 
+     cont++;
+     Serial.println("Estoy FAIL");}
+     else
+     {
+     Serial.println("Estoy AUSENTE");}
+   
+//!!!!!!!!!!!!!!!!!!!!!
 switch(modo){
   case 1: //Coreografia
   //Incorporar movimientos iniciales
+  Serial.println("Coreografia");
   break;
   case 2: //Seguimiento
       //Obtener Opcion
-    RSSI_= WiFi.RSSI();
-    dist_RSSI = distancia_RSSI(RSSI_);  //Distancia obtenida con el RSSI
+
+   // dist_RSSI = distancia_RSSI(RSSI_);  //Distancia obtenida con el RSSI
+    //Serial.print("Distancia RSSI ");
+    //Serial.println(dist_RSSI);
     Orientaciones.set_ent_X(S_valorX);
     Orientaciones.set_ent_Y(S_valorY);
     Orientaciones.set_ent_Z(S_valorZ);
     Orientaciones.obtener_orientacion();
-    Serial.println("Valor en eje X");
-    Serial.println(Orientaciones.get_OX());
-    Serial.println("Valor en eje Y");
-    Serial.println(Orientaciones.get_OY());
-    Serial.println("Valor en eje Z");
-    Serial.println(Orientaciones.get_OZ());
-        Serial.print("Distancia ");
-    Serial.println(dist_RSSI);
+    //Serial.println("Valor en eje X");
+   // Serial.println(Orientaciones.get_OX());
+   // Serial.println("Valor en eje Y");
+   // Serial.println(Orientaciones.get_OY());
+   // Serial.println("Valor en eje Z");
+   // Serial.println(Orientaciones.get_OZ());
+       
 
     //Logica para el seguimiento
   
   break;
   case 3: //Mezcla
   //Mezclar los modos anteriores
+  Serial.println("Mezcla");
   break;
 }
 
 
 
  
-  delay(1000);
+ 
 }
 
 float distancia_RSSI (float rssi)
