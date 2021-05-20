@@ -9,6 +9,21 @@
 #include "MPU6050.h"
 #include "Wire.h"
 
+//INICIO PARTE DE CARLOS
+#include <WebServer.h>
+#include "Servo.h"
+#include "Thread.h"
+#include "./layout/html.h"
+#include "behaviors.h"
+
+Thread movment = Thread();
+int first = 5;
+int second = 10;
+int third = 15;
+
+int change_flag = 0;
+int init_flag = 1;
+
 //Informacion necesaria para la Tx y Rx de datos entre ESP
 String cadena, S_valorX,S_valorY,S_valorZ;
 // The recipient MAC address. It must be modified for each device.
