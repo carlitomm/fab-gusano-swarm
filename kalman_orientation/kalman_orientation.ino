@@ -19,13 +19,13 @@ uint32_t timer;
 uint8_t i2cData[14]; 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Wire.begin();
-#if ARDUINO >= 157
-  Wire.setClock(400000UL); 
-#else
-  TWBR = ((F_CPU / 400000UL) - 16) / 2; 
-#endif
+//#if ARDUINO >= 157
+ //Wire.setClock(400000UL); 
+//#else
+ // TWBR = ((F_CPU / 400000UL) - 16) / 2; 
+//#endif
 
   i2cData[0] = 7; 
   i2cData[1] = 0x00; 

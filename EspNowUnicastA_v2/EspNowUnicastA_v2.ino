@@ -51,6 +51,8 @@ int16_t gx, gy, gz;
 long tiempo_prev, dt;
 float girosc_ang_x, girosc_ang_y, girosc_ang_z;
 float girosc_ang_x_prev, girosc_ang_y_prev, girosc_ang_z_prev;
+float orient_X_B, orient_X_A,orient_Y_B, orient_Y_A, orient_Z_B, orient_Z_A;
+float Rssi_A, Rssi_B;
 //****
 
 void updateGiro(){
