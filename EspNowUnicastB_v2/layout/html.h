@@ -187,16 +187,16 @@ String SendHTML(uint8_t gusano_state, int movment, int Tdelay) {
 
 String SendSwarmBehavior(){
   String ptr = HTMLheader();
-  ptr += "<a class=\"button button-mov\" href = \"/\" >Coleography</a> \n";
-  ptr += "<a class=\"button button-mov\" href = \"/\" >Following</a> \n";
-  ptr += "<a class=\"button button-mov\" href = \"/\" >Mixed</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/coleography\" >Coleography</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/following\" >Following</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/mixed\" >Mixed</a> \n";
   return ptr;
 }
 
 String SendSwarmRole(){
   String ptr = HTMLheader();
-  ptr += "<a class=\"button button-mov\" href = \"/\" >Leader</a> \n";
-  ptr += "<a class=\"button button-mov\" href = \"/\" >Follower</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/leader\" >Leader</a> \n";
+  ptr += "<a class=\"button button-mov\" href = \"/follower\" >Follower</a> \n";
   return ptr;
 }
 

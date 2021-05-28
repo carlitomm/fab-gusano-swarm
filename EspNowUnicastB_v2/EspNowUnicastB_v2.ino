@@ -157,6 +157,13 @@ setup()
 
   server.on("/swarm_behavior", handle_swarm_behavior);
   server.on("/swarm_role", handle_swarm_role);
+  server.on("/coleography", handle_coleography);
+  server.on("/following", handle_following);
+  server.on("/mixed", handle_mixed);
+  server.on("/leader", handle_leader);
+  server.on("/follower", handle_follower);
+  
+  
   server.begin();
 
   mov = 1;
@@ -556,6 +563,31 @@ void handle_swarm_role(){
   
   server.send(200, "text/html", SendSwarmRole());
   
+}
+
+void handle_coleography(){
+  modo = 1;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_following(){
+  modo = 2;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_mixed(){
+  modo = 3;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_leader(){
+  opcion = 1;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_follower(){
+  opcion = 2;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
 }
 
 //FIN DE PARTE DE CARLOS
