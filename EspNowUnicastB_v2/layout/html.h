@@ -120,9 +120,9 @@ String SendHTML(uint8_t gusano_state, int movment, int Tdelay) {
     {
       ptr += "<h2>Movement Type: LATERAL RIGHT Rotating</h2>";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_1\" >COMBINED</a> \n";
-      //ptr += "<a class=\"button button-mov\" href = \"/change_mov_3\" >LINEAR BACK</a> \n";
+      ptr += "<a class=\"button button-mov\" href = \"/change_mov_3\" >LINEAR BACK</a> \n";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_4\" >LATERAL LEFT</a> \n";
-      //ptr += "<a class=\"button button-mov\" href = \"/change_mov_5\" >LINEAR FRONT</a> \n";
+      ptr += "<a class=\"button button-mov\" href = \"/change_mov_5\" >LINEAR FRONT</a> \n";
       //ptr += "<a class=\"button button-mov\" href = \"/change_mov_6\" >6 ROTATION</a> \n";
       //ptr += "<a class=\"button button-mov\" href = \"/change_mov_7\" >7 New Lateral</a> \n";
     }
@@ -133,16 +133,16 @@ String SendHTML(uint8_t gusano_state, int movment, int Tdelay) {
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_2\" >LATERAL RIGHT</a> \n";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_4\" >LATERAL LEFT</a> \n";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_5\" >LINEAR FRONT</a> \n";
-      ptr += "<a class=\"button button-mov\" href = \"/change_mov_6\" >6 ROTATION</a> \n";
-      ptr += "<a class=\"button button-mov\" href = \"/change_mov_7\" >7 New Lateral</a> \n";
+      // ptr += "<a class=\"button button-mov\" href = \"/change_mov_6\" >6 ROTATION</a> \n";
+      // ptr += "<a class=\"button button-mov\" href = \"/change_mov_7\" >7 New Lateral</a> \n";
     }
     if (movment == 4)
     {
       ptr += "<h2>Movement Type: LATERAL lEFT</h2>";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_1\" >COMBINED</a> \n";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_2\" >LATERAL RIGHT</a> \n";
-      //ptr += "<a class=\"button button-mov\" href = \"/change_mov_3\" >LINEAR BACK</a> \n";
-      //ptr += "<a class=\"button button-mov\" href = \"/change_mov_5\" >LINEAR FRONT</a> \n";
+      ptr += "<a class=\"button button-mov\" href = \"/change_mov_3\" >LINEAR BACK</a> \n";
+      ptr += "<a class=\"button button-mov\" href = \"/change_mov_5\" >LINEAR FRONT</a> \n";
       //ptr += "<a class=\"button button-mov\" href = \"/change_mov_6\" >6 ROTATION</a> \n";
       //ptr += "<a class=\"button button-mov\" href = \"/change_mov_7\" >7 New Lateral</a> \n";
     }
@@ -153,8 +153,8 @@ String SendHTML(uint8_t gusano_state, int movment, int Tdelay) {
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_2\" >LATERAL RIGHT</a> \n";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_3\" >LINEAR BACK</a> \n";
       ptr += "<a class=\"button button-mov\" href = \"/change_mov_4\" >LATERAL LEFT</a> \n";
-      ptr += "<a class=\"button button-mov\" href = \"/change_mov_6\" >6 ROTATION</a> \n";
-      ptr += "<a class=\"button button-mov\" href = \"/change_mov_7\" >7 New Lateral</a> \n";
+      // ptr += "<a class=\"button button-mov\" href = \"/change_mov_6\" >6 ROTATION</a> \n";
+      // ptr += "<a class=\"button button-mov\" href = \"/change_mov_7\" >7 New Lateral</a> \n";
     }
     if (movment == 6)
     {
