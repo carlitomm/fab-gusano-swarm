@@ -56,6 +56,7 @@ void obtener_orientacion();
   void set_ent_R(String value);
   String get_ent_R();
 	void obtener_int(String cadena);
+    void obtener_int_delay(String cadena);
   void set_entero(int value);
   int get_entero();
 };

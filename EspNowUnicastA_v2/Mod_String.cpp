@@ -16,6 +16,7 @@ OX=0;
 OY=0;
 OZ=0;
 RSSI_D=0;
+entero=0;
 }
 
 void Mod_String::obtener_orientacion(){
@@ -25,13 +26,26 @@ void Mod_String::obtener_orientacion(){
   ent_Z.remove(0,1);
   ent_R.remove(0,1);
 
-OX = ent_X.toInt();
-OY = ent_Y.toInt();
-OZ = ent_Z.toInt();
+OX = ent_X.toFloat();
+OY = ent_Y.toFloat();
+OZ = ent_Z.toFloat();
 RSSI_D = ent_R.toInt();
 }
 
+void Mod_String::obtener_int(String cadena){
+    
+  cadena.remove(0,1);
+  cadena.remove(2,3);
+  entero = cadena.toInt();
 
+}
+void Mod_String::obtener_int_delay(String cadena){
+    
+  cadena.remove(0,1);
+  cadena.remove(3,2);
+  entero = cadena.toInt();
+
+}
 void Mod_String::obtener_enteros(){
     
  entrada.remove(0,8);
@@ -76,7 +90,12 @@ void Mod_String:: set_orientacionY(String value){
 String Mod_String:: get_orientacionY(){
 	return orientacionY;
 }
-
+void Mod_String:: set_entero(int value){
+  entero = value;
+}
+int Mod_String:: get_entero(){
+  return entero;
+}
 void Mod_String:: set_orientacionZ(String value){
 	orientacionZ = value;
 }
@@ -94,23 +113,23 @@ String Mod_String :: get_RSSI_CADENA(){
 
 
 
-void Mod_String:: set_OX(int value){
+void Mod_String:: set_OX(float value){
 	OX = value;
 }
-int Mod_String:: get_OX(){
+float Mod_String:: get_OX(){
 	return OX;
 }
 
-void Mod_String:: set_OY(int value){
+void Mod_String:: set_OY(float value){
 	OY = value;
 }
-int Mod_String:: get_OY(){
+float Mod_String:: get_OY(){
 	return OY;
 }
-void Mod_String:: set_OZ(int value){
+void Mod_String:: set_OZ(float value){
 	OZ = value;
 }
-int Mod_String:: get_OZ(){
+float Mod_String:: get_OZ(){
 	return OZ;
 }
 void Mod_String:: set_RSSI_D(int value){

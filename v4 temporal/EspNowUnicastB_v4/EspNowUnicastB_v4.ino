@@ -1,4 +1,4 @@
-#include <WifiEspNow.h>
+ #include <WifiEspNow.h>
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <ESP8266WiFi.h>
 #elif defined(ARDUINO_ARCH_ESP32)
@@ -12,7 +12,8 @@
 //INICIO PARTE DE CARLOS
 #include <ESP8266WebServer.h>
 #include "Servo.h"
-#include "./thread/Thread.h"
+#include "Thread.h"
+
 #include "./layout/html.h"
 #include "behaviors.h"
 
@@ -50,8 +51,8 @@ Mod_String Orientaciones;
 WifiEspNowSendStatus status_B; 
 
 int inicio, cont;
-int modo =2; //Modo de trabajo del robot: 1 Coreografia, 2 Seguimiento, 3 Mezcla
-int opcion =2; //Opcion de seguimiento : 1 Lider, 2 Seguidor
+int modo; //Modo de trabajo del robot: 1 Coreografia, 2 Seguimiento, 3 Mezcla
+int opcion; //Opcion de seguimiento : 1 Lider, 2 Seguidor
 float d_RSSI, dist_RSSI;
   int val =1200;
   int valy = 9800;
@@ -70,33 +71,12 @@ float orient_X_B, orient_X_A,orient_Y_B, orient_Y_A, orient_Z_B, orient_Z_A;
 float Rssi_A, Rssi_B;
 //****
 
-void updateGiro(){
-  dt = (millis() - tiempo_prev) / 1000.0;
-  //dt = millis() - tiempo_prev;
-  tiempo_prev = millis();
-
-accel_ang_x = atan(ay / sqrt(pow(ax, 2) + pow(az, 2)))*(180.0/ 3.14);
-accel_ang_y = atan(-ax / sqrt(pow(ay, 2) + pow(az, 2)))*(180.0/ 3.14);
-
- // girosc_ang_x = 0.98*(girosc_ang_x_prev + (gx / 131)*dt) + 0.02*accel_ang_x;
- // girosc_ang_y = 0.98*(girosc_ang_y_prev + (gy / 131)*dt) + 0.02*accel_ang_y;
-   
-//girosc_ang_x = (gx / 131)*dt / 1000.0 + girosc_ang_x_prev;
-//girosc_ang_y = (gy / 131)*dt / 1000.0 + girosc_ang_y_prev;
- //girosc_ang_z = (gz / 131)*dt/ 1000.0 + girosc_ang_z_prev;
-
-  girosc_ang_x_prev = girosc_ang_x;
-    girosc_ang_y_prev = girosc_ang_y;
-      girosc_ang_z_prev = girosc_ang_z;
-  
-}
-
 
 void
 printReceivedMessage(const uint8_t mac[6], const uint8_t* buf, size_t count, void* cbarg)
 {
   //Serial.printf("Message from %02X:%02X:%02X:%02X:%02X:%02X\n", mac[0], mac[1], mac[2], mac[3],
-              //  mac[4], mac[5]);
+            //    mac[4], mac[5]);
   for (int i = 0; i < count; ++i) {
    // Serial.print(static_cast<char>(buf[i]));
     datoRX[i]= static_cast<char>(buf[i]);
@@ -136,7 +116,7 @@ setup()
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP);
   WiFi.softAP(ssid, password);
-  WiFi.softAPdisconnect(false);
+  //WiFi.softAPdisconnect(false);
 
   //iNICIO DE PARTE DE CARLOS
   server.on("/", handleRoot);
@@ -157,33 +137,34 @@ setup()
 
   server.on("/swarm_behavior", handle_swarm_behavior);
   server.on("/swarm_role", handle_swarm_role);
+  server.on("/coleography", handle_coleography);
+  server.on("/following", handle_following);
+  server.on("/mixed", handle_mixed);
+  server.on("/leader", handle_leader);
+  server.on("/follower", handle_follower);
   server.begin();
 
   mov = 1;
 
-  servo1.attach(4); //5-14 D5
-  servo2.attach(5); //6-12 D6
-  servo3.attach(1);  //16-15 D8
+  servo1.attach(14); //5-14 D5
+  servo2.attach(12); //6-12 D6
+  servo3.attach(15);  //16-15 D8
 
   movment.onRun(on_movment);
   movment.setInterval(tiempo_delay);
   //FIN DE PARTE DE CARLOS
 
-  // WiFi must be powered on to use ESP-NOW unicast.
-  // It could be either AP or STA mode, and does not have to be connected.
-  // For best results, ensure both devices are using the same WiFi channel.
-
-  Serial.print("MAC address of this node is ");
-  Serial.println(WiFi.softAPmacAddress());
+  //Serial.print("MAC address of this node is ");
+  //Serial.println(WiFi.softAPmacAddress());
 
   uint8_t mac[6];
   WiFi.softAPmacAddress(mac);
-  Serial.println();
-  Serial.println("You can paste the following into the program for the other device:");
-  Serial.printf("static uint8_t PEER[]{0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X};\n", mac[0],
-                mac[1], mac[2], mac[3], mac[4], mac[5]);
-  Serial.println();
-
+  //Serial.println();
+ // Serial.println("You can paste the following into the program for the other device:");
+ // Serial.printf("static uint8_t PEER[]{0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X};\n", mac[0],
+               // mac[1], mac[2], mac[3], mac[4], mac[5]);
+  //Serial.println();
+modo =1;
   bool ok = WifiEspNow.begin();
   if (!ok) {
     Serial.println("WifiEspNow.begin() failed");
@@ -203,6 +184,7 @@ setup()
 
   cont =0;
     inicio =0;
+    //Sincronia
     while(inicio != 1){
       char msg[60];
   int lenm = snprintf(msg, sizeof(msg), "Inicio");
@@ -214,6 +196,7 @@ setup()
      Serial.print(".");
     }
     Serial.println();
+    //Fin Sincronia
 }
 
 
@@ -221,18 +204,10 @@ void
 loop()
 {
 
-  //INICIO DE PARTE DE CARLOS
   server.handleClient();
-/*
-  if (gusano_state == 1) {
-    if (movment.shouldRun()) {
-      movment.run();
-    }
-  }*/
-  //FIN DE PARTE DE CARLOS
 
   //####Desconexion
-while(cont>10)
+while(cont>5)
   {
       char msg[60];
   int lenm = snprintf(msg, sizeof(msg), "Inicio");
@@ -244,16 +219,7 @@ while(cont>10)
     Serial.println("Desconectado");
   }
   //####
-   
-//Leer los datos modo y opcion de la web
  
-//Obtencion de las orientaciones
-  mpu.getAcceleration(&ax, &ay, &az);
-  mpu.getRotation(&gx, &gy, &gz);
-  updateGiro();
-// Detalle: hasta ahora los valores validos son girosc_ang_x y girosc_ang_y
-
-
 //Procedimiento para TX las Orientaciones
  char msg[60];
   int len = snprintf(msg, sizeof(msg), "X %d", val);
@@ -270,10 +236,9 @@ while(cont>10)
   WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), opc_w);
   int time_delay_w = snprintf(msg, sizeof(msg), "D %d", tiempo_delay);
   WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), time_delay_w);
-     
-  
-  
-  //Fin TX
+  int gus_state_w = snprintf(msg, sizeof(msg), "G %d", gusano_state);
+  WifiEspNow.send(PEER, reinterpret_cast<const uint8_t*>(msg), gus_state_w);
+//Fin TX
 delay(50);
 //!!!!!!!!!!!!!!!!!!!!!
     status_B = WifiEspNow.getSendStatus();
@@ -282,8 +247,25 @@ delay(50);
     else if(status_B == WifiEspNowSendStatus::FAIL)
      { cont++;}
  
-   
+   Serial.print("Modo "); Serial.println(modo);
+   Serial.print("Opcion"); Serial.println(opcion);
 //!!!!!!!!!!!!!!!!!!!!!
+
+//~~~~~Rx de Orientacion A y RSSI
+     /* Orientaciones.set_ent_X(S_valorX);
+      Orientaciones.set_ent_Y(S_valorY);
+      Orientaciones.set_ent_Z(S_valorZ);
+      Orientaciones.set_ent_R(RSSI_cad);
+      Orientaciones.obtener_orientacion();
+      orient_X_A=Orientaciones.get_OX();
+      orient_Y_A=Orientaciones.get_OY();
+      orient_Z_A=Orientaciones.get_OZ();
+      Rssi_B=Orientaciones.get_RSSI_D();*/
+
+    //Serial.print("RSSI ");
+    //Serial.println(Rssi_B);
+
+//~~~~~Rx de Orientacion y RSSI
   
 switch(modo){
   case 1: //Coreografia
@@ -294,16 +276,28 @@ switch(modo){
   }
   break;
   case 2: //Seguimiento
+      //if(opcion == 1)//Lider
+     // {
+      //  if (gusano_state == 1) {
+    //if (movment.shouldRun()) {
+    //  movment.run();
+   // }
+ // }
+     // }
+      
+      
+      
       //Obtener Opcion
-    
-    Orientaciones.set_ent_X(S_valorX);
-    Orientaciones.set_ent_Y(S_valorY);
-    Orientaciones.set_ent_Z(S_valorZ);
-    Orientaciones.set_ent_R(RSSI_cad);
-    Orientaciones.obtener_orientacion();
-    Serial.print("RSSI ");
-    Serial.println(Orientaciones.get_RSSI_D());
-    dist_RSSI = distancia_RSSI(Orientaciones.get_RSSI_D());  //Distancia obtenida con el RSSI
+          
+   
+   // Orientaciones.set_ent_X(S_valorX);
+   // Orientaciones.set_ent_Y(S_valorY);
+   // Orientaciones.set_ent_Z(S_valorZ);
+   // Orientaciones.set_ent_R(RSSI_cad);
+   // Orientaciones.obtener_orientacion();
+   // Serial.print("RSSI ");
+   // Serial.println(Orientaciones.get_RSSI_D());
+     /*dist_RSSI = distancia_RSSI(Orientaciones.get_RSSI_D());  //Distancia obtenida con el RSSI
     Serial.println("Valor en eje X");
     Serial.println(Orientaciones.get_OX());
     Serial.println("Valor en eje Y");
@@ -313,11 +307,11 @@ switch(modo){
     Serial.print("Distancia ");
     Serial.println(dist_RSSI);
     //Logica para el seguimiento
-  
+  */
   break;
   case 3: //Mezcla
   //Mezclar los modos anteriores
-  Serial.println("Mezcla");
+ 
   break;
 }
 
@@ -562,6 +556,31 @@ void handle_swarm_role(){
   
   server.send(200, "text/html", SendSwarmRole());
   
+}
+
+void handle_coleography(){
+  modo = 1;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_following(){
+  modo = 2;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_mixed(){
+  modo = 3;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_leader(){
+  opcion = 1;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
+}
+
+void handle_follower(){
+  opcion = 2;
+  server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
 }
 
 //FIN DE PARTE DE CARLOS

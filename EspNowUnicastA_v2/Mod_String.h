@@ -17,10 +17,11 @@ private:
   String ent_Y;
   String ent_Z;
     String ent_R;
-	int OX;
-	int OY;
-	int OZ;
+	float OX;
+	float OY;
+	float OZ;
   int RSSI_D;
+    int entero;
 
 public:
 	Mod_String();		//Constructor de la clase
@@ -38,12 +39,12 @@ void obtener_orientacion();
 	String get_orientacionZ();
       void set_RSSI_CADENA(String value);
   String get_RSSI_CADENA();
-	void set_OX(int value);
-	int get_OX();
-	void set_OY(int value);
-	int get_OY();
-	void set_OZ(int value);
-	int get_OZ();
+	void set_OX(float value);
+	float get_OX();
+	void set_OY(float value);
+	float get_OY();
+	void set_OZ(float value);
+	float get_OZ();
    void set_RSSI_D(int value);
   int get_RSSI_D();
    void set_ent_X(String value); 
@@ -54,6 +55,8 @@ void obtener_orientacion();
   String get_ent_Z();
   void set_ent_R(String value);
   String get_ent_R();
-	
-
+	void obtener_int(String cadena);
+    void obtener_int_delay(String cadena);
+  void set_entero(int value);
+  int get_entero();
 };

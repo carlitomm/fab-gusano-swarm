@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include <WiFi.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
+#include <ESP8266WiFi.h>
 #include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+//#include <ESPmDNS.h>
+
 
 #include "Servo.h"
 #include "Thread.h"
@@ -17,7 +18,7 @@ int third = 15;
 int change_flag = 0;
 int init_flag = 1;
 
-WebServer server(80);
+ESP8266WebServer server(80);
 const char* ssid = "WiFi-Meat";
 const char* password = "12345678";
 int mov;
@@ -64,9 +65,9 @@ void setup() {
 
   //server.send(200, "text/html", SendHTML(gusano_state, mov, tiempo_delay));
 
-  servo1.attach(4); //5-14 D5
-  servo2.attach(5); //6-12 D6
-  servo3.attach(1);  //16-15 D8
+  servo1.attach(14); //5-14 D5
+  servo2.attach(12); //6-12 D6
+  servo3.attach(15);  //16-15 D8
 
   mov = 1;
 

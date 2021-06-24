@@ -8,13 +8,15 @@
 #include "I2Cdev.h"
 #include "MPU6050.h"
 #include "Wire.h"
+#include <SimpleKalmanFilter.h>
 
 //INICIO PARTE DE CARLOS
 #include <ESP8266WebServer.h>
 #include "Servo.h"
-#include "./thread/Thread.h"
+#include "Thread.h"
 #include "./layout/html.h"
 #include "behaviors.h"
+
 
 Thread movment = Thread();
 int first = 5;
@@ -39,12 +41,12 @@ Servo servo2;
 Servo servo3;
 
 //Informacion necesaria para la Tx y Rx de datos entre ESP
-String cadena, S_valorX,S_valorY,S_valorZ, S_modo, S_opc, S_mov, S_tiempo_delay;
+String cadena, S_gus_state, S_valorX,S_valorY,S_valorZ, S_modo, S_opc, S_mov, S_tiempo_delay;
 // The recipient MAC address. It must be modified for each device.
 static uint8_t PEER[]{0xDA, 0xBF, 0xC0, 0xF9, 0xEA, 0x25};
 char datoRX[6];
 Mod_String cambios;
-
+SimpleKalmanFilter simpleKalmanFilter(6, 6, 0.01);
 WifiEspNowSendStatus status_A; 
 
 int inicio, cont;
@@ -53,9 +55,9 @@ int opcion; //Opcion de seguimiento : 1 Lider, 2 Seguidor
 int valx = 3000;
 int valy = 4000;
 int valz = 5000;
-float RSSI_;
+float RSSI_; int n;
 float d_RSSI, dist_RSSI;
-
+int cont_rssi;
 //Variables para la obtencion de las orientaciones
 const int mpuAddress = 0x68;
 MPU6050 mpu(mpuAddress);
@@ -119,8 +121,11 @@ printReceivedMessage(const uint8_t mac[6], const uint8_t* buf, size_t count, voi
     case 'O':
     S_opc= cadena;
     break;  
-        case 'D':
+    case 'D':
     S_tiempo_delay= cadena;
+    break;  
+    case 'G':
+    S_gus_state= cadena;
     break;  
 
   }
@@ -139,25 +144,25 @@ setup()
   WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
   WiFi.softAP(ssid, password);
-  WiFi.softAPdisconnect(false);
+  //WiFi.softAPdisconnect(false);
 
   mov = 1;
 
-  servo1.attach(4); //5-14 D5
-  servo2.attach(5); //6-12 D6
-  servo3.attach(1);  //16-15 D8
+  servo1.attach(14); //5-14 D5
+  servo2.attach(12); //6-12 D6
+  servo3.attach(15);  //16-15 D8
 
   movment.onRun(on_movment);
   movment.setInterval(tiempo_delay);
 
 
   
-  Serial.print("MAC address of this node is ");
-  Serial.println(WiFi.softAPmacAddress());
+  //Serial.print("MAC address of this node is ");
+  //Serial.println(WiFi.softAPmacAddress());
 
   uint8_t mac[6];
   WiFi.softAPmacAddress(mac);
-  Serial.println();
+ Serial.println();
   Serial.println("You can paste the following into the program for the other device:");
   Serial.printf("static uint8_t PEER[]{0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X};\n", mac[0],
                 mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -173,7 +178,7 @@ setup()
 
   ok = WifiEspNow.addPeer(PEER);
   if (!ok) {
-    Serial.println("WifiEspNow.addPeer() failed");
+    //Serial.println("WifiEspNow.addPeer() failed");
     ESP.restart();
   }
   S_valorX="";
@@ -195,13 +200,15 @@ setup()
     Serial.print(".");
     }
     Serial.println();
+  
+WiFi.scanNetworks(true,false);
 }
 
 void
 loop()
 {
   //#####Desconexion
-  while(cont>10)
+  while(cont>5)
   {
       char msg[60];
   int lenm = snprintf(msg, sizeof(msg), "Inicio");
@@ -212,25 +219,43 @@ loop()
     { cont=0;}
     //Serial.println("Desconectado");
   }
+ 
   //#####Desconexion
-//Obtencion de las orientaciones
-  mpu.getAcceleration(&ax, &ay, &az);
-  mpu.getRotation(&gx, &gy, &gz);
-//  updateGiro();
-// Detalle: hasta ahora los valores validos son girosc_ang_x y girosc_ang_y
-
-    int n=WiFi.scanNetworks();
-    if(n==0)
-    Serial.println("No networks found");
-    else{
+if(cont_rssi == 5){
+  WiFi.scanNetworks(true,false);
+  cont_rssi=0;
+}
+else if(cont_rssi > 1) 
+{
+        int n=WiFi.scanComplete();
+        //Serial.println(n);
+        if(n > -1)
+   {
       for(int i=0;i<n;++i){
-       if(WiFi.SSID(i)!="WiFi-Meat")
-        continue;
-     RSSI_=WiFi.RSSI(i);
-      
+              //Serial.print(i); Serial.print("  ");
+              //Serial.print(WiFi.SSID(i)); Serial.print("  ");
+             // Serial.println(WiFi.RSSI(i));
+      if(WiFi.SSID(i)!="WiFi-Meat")
+       continue;
+      // Serial.println(WiFi.RSSI(i));
+    RSSI_=WiFi.RSSI(i);
+     Rssi_A=simpleKalmanFilter.updateEstimate(RSSI_);
+Serial.print(RSSI_);
+Serial.print(",");
+Serial.println(Rssi_A);
         }}
+        //else
+       // Serial.println("procesando ");
+}
+ cont_rssi ++;
+  dist_RSSI = distancia_RSSI(Rssi_A);
+  Serial.print("Distancia ");
+  Serial.println(dist_RSSI);
+       
+    
 
-
+//Serial.print("Rssi ");
+//Serial.println(Rssi_A);
 //Procedimiento para TX las Orientaciones y RSSI
   char msg[60];
   int lenx = snprintf(msg, sizeof(msg), "X %d",valx);
@@ -260,9 +285,22 @@ loop()
   cambios.obtener_int(S_opc);
   opcion=cambios.get_entero();
   cambios.set_entero(0);
-    cambios.obtener_int(S_tiempo_delay);
+  cambios.obtener_int_delay(S_tiempo_delay);
   tiempo_delay=cambios.get_entero();
   cambios.set_entero(0);
+  cambios.obtener_int(S_gus_state);
+  gusano_state=cambios.get_entero();
+  cambios.set_entero(0);
+  Serial.print("Modo ");
+  Serial.println(modo);
+  Serial.print("Opcion ");
+  Serial.println(opcion);  
+  /*Serial.print("Movimiento ");
+  Serial.println(mov);  
+  Serial.print("Tiempo ");
+  Serial.println(tiempo_delay);
+  Serial.print("Estado gusano ");
+  Serial.println(gusano_state);*/
 //Datos procesados
 
 switch(modo){
@@ -279,10 +317,10 @@ switch(modo){
    // dist_RSSI = distancia_RSSI(RSSI_);  //Distancia obtenida con el RSSI
     //Serial.print("Distancia RSSI ");
     //Serial.println(dist_RSSI);
-    cambios.set_ent_X(S_valorX);
-    cambios.set_ent_Y(S_valorY);
-    cambios.set_ent_Z(S_valorZ);
-    cambios.obtener_orientacion();
+    //cambios.set_ent_X(S_valorX);
+   /// cambios.set_ent_Y(S_valorY);
+   // cambios.set_ent_Z(S_valorZ);
+   // cambios.obtener_orientacion();
     //Serial.println("Valor en eje X");
    // Serial.println(Orientaciones.get_OX());
    // Serial.println("Valor en eje Y");
@@ -296,8 +334,9 @@ switch(modo){
   break;
   case 3: //Mezcla
   //Mezclar los modos anteriores
-  Serial.println("Mezcla");
+  
   break;
+   
 }
 
 
@@ -308,7 +347,7 @@ switch(modo){
 
 float distancia_RSSI (float rssi)
 {
-  float expo=(-1*rssi-58.0)/26.0;
+  float expo=(-1*rssi-59.0)/27.0;
   //float Fm = rssi+75; //-98,-91,-93,-75,-72
  // float logar = 27.0*log10(5);
   //float expo=((-18-Fm-rssi-logar+48.56)/27.0);

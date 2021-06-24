@@ -35,6 +35,14 @@ RSSI_D = ent_R.toInt();
 void Mod_String::obtener_int(String cadena){
     
   cadena.remove(0,1);
+  cadena.remove(2,3);
+  entero = cadena.toInt();
+
+}
+void Mod_String::obtener_int_delay(String cadena){
+    
+  cadena.remove(0,1);
+  cadena.remove(3,2);
   entero = cadena.toInt();
 
 }

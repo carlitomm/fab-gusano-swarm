@@ -12,10 +12,13 @@ ent_X="";
 ent_Y="";
 ent_Z="";
 ent_R="";
+ent_P="";
 OX=0;
 OY=0;
 OZ=0;
 RSSI_D=0;
+RSSI_P=0;
+entero=0;
 }
 
 void Mod_String::obtener_orientacion(){
@@ -24,12 +27,22 @@ void Mod_String::obtener_orientacion(){
   ent_Y.remove(0,1);
   ent_Z.remove(0,1);
   ent_R.remove(0,1);
-
-OX = ent_X.toInt();
-OY = ent_Y.toInt();
-OZ = ent_Z.toInt();
+  ent_P.remove(0,1);
+OX = ent_X.toFloat();
+OY = ent_Y.toFloat();
+OZ = ent_Z.toFloat();
 RSSI_D = ent_R.toInt();
+RSSI_P = ent_P.toInt();
 }
+
+void Mod_String::obtener_int(String cadena){
+    
+  cadena.remove(0,1);
+
+  entero = cadena.toInt();
+
+}
+
 
 
 void Mod_String::obtener_enteros(){
@@ -89,26 +102,31 @@ String Mod_String :: get_orientacionZ(){
 
 
 
-void Mod_String:: set_OX(int value){
-	OX = value;
+void Mod_String:: set_OX(float value){
+  OX = value;
 }
-int Mod_String:: get_OX(){
-	return OX;
-}
-
-void Mod_String:: set_OY(int value){
-	OY = value;
-}
-int Mod_String:: get_OY(){
-	return OY;
-}
-void Mod_String:: set_OZ(int value){
-	OZ = value;
-}
-int Mod_String:: get_OZ(){
-	return OZ;
+float Mod_String:: get_OX(){
+  return OX;
 }
 
+void Mod_String:: set_OY(float value){
+  OY = value;
+}
+float Mod_String:: get_OY(){
+  return OY;
+}
+void Mod_String:: set_OZ(float value){
+  OZ = value;
+}
+float Mod_String:: get_OZ(){
+  return OZ;
+}
+void Mod_String:: set_entero(int value){
+  entero = value;
+}
+int Mod_String:: get_entero(){
+  return entero;
+}
 //_________
 
 void Mod_String:: set_ent_X(String value){
@@ -136,12 +154,23 @@ void Mod_String:: set_ent_R(String value){
 String Mod_String :: get_ent_R(){
   return ent_R;
 }
-
+void Mod_String:: set_ent_P(String value){
+  ent_P = value;
+}
+String Mod_String :: get_ent_P(){
+  return ent_P;
+}
 void Mod_String:: set_RSSI_D(int value){
  RSSI_D = value;
 }
 int Mod_String:: get_RSSI_D(){
   return RSSI_D;
+}
+void Mod_String:: set_RSSI_P(int value){
+ RSSI_P = value;
+}
+int Mod_String:: get_RSSI_P(){
+  return RSSI_P;
 }
 void Mod_String:: set_RSSI_CADENA(String value){
   RSSI_CADENA = value;
