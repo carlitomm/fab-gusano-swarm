@@ -1,5 +1,5 @@
 #include "Mod_String.h"
-#include "String.h"
+//#include "String.h"
 
 Mod_String :: Mod_String(){
 

@@ -1,4 +1,4 @@
-#include "String.h" 
+//#include "String.h" 
 #include <ESP8266WiFi.h>
 
 union int_b {
